@@ -81,7 +81,7 @@ resource "aws_lb_target_group" "main" {
   }
 
   tags       = "${merge(var.tags, map("Name", lookup(var.target_groups[count.index], "name")))}"
-  count      = "${var.target_groups_count * signum(length(concat(aws_lb.application.*.arn, aws_lb.application_no_logs.*.arn)))}"
+  count      = "${length(concat(aws_lb.application.*.arn, aws_lb.application_no_logs.*.arn)) > 0 : var.target_groups_count : 0}"
 
   lifecycle {
     create_before_destroy = true
