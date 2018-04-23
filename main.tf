@@ -1,5 +1,5 @@
 locals {
-  create_alb         = "${var.load_balancer_arn == ""}"
+  create_alb         = "${var.load_balancer_arn == "" && var.create_alb}"
   create_logs        = "${var.log_bucket_name != ""}"
   create_alb_logs    = "${local.create_alb && local.create_logs}"
   create_alb_no_logs = "${local.create_alb && !local.create_logs}"

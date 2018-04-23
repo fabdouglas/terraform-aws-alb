@@ -1,6 +1,11 @@
 variable "load_balancer_arn" {
-  description = "Whether to create the ALB"
+  description = "Optional ALB to be attached to. Will not be created"
   default     = ""
+}
+
+variable "create_alb" {
+  description = "Whether to create the ALB"
+  default     = true
 }
 
 variable "elb_id" {
