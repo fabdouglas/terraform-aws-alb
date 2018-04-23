@@ -1,6 +1,6 @@
 output "dns_name" {
   description = "The DNS name of the load balancer."
-  value       = "${join(",",concat(aws_lb.application.*.dns_name, aws_lb.application_no_logs.*.dns_name)}"
+  value       = "${join(",",concat(aws_lb.application.*.dns_name, aws_lb.application_no_logs.*.dns_name))}"
 }
 
 output "http_tcp_listener_arns" {
@@ -30,7 +30,7 @@ output "load_balancer_arn_suffix" {
 
 output "load_balancer_id" {
   description = "The ID and ARN of the load balancer we created."
-  value       = "${join(",", concat(aws_lb.application.*.id, aws_lb.application_no_logs.*.id)}"
+  value       = "${join(",", concat(aws_lb.application.*.id, aws_lb.application_no_logs.*.id))}"
 }
 
 output "load_balancer_zone_id" {
