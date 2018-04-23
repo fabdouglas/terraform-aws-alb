@@ -3,7 +3,7 @@ locals {
   create_logs        = "${var.log_bucket_name != ""}"
   create_alb_logs    = "${local.create_alb && local.create_logs}"
   create_alb_no_logs = "${local.create_alb && !local.create_logs}"
-  load_balancer_arn  = "${local.create_alb ? local.create_alb_logs ? aws_lb.application.arn : aws_lb.application_no_logs.arn : var.load_balancer_arn}"
+  load_balancer_arn  = "${local.create_alb ? local.create_alb_logs ? aws_lb.application[0].arn : aws_lb.application_no_logs[0]arn : var.load_balancer_arn}"
   lb_module          = "${local.create_alb_no_logs ? "aws_lb.application_no_logs.arn" : "aws_lb.application"}" 
 }
 
