@@ -1,4 +1,14 @@
+locals {
+  create_alb         = "${var.load_balancer_arn == ""}"
+  create_logs        = "${var.log_bucket_name != ""}"
+  create_alb_logs    = "${local.create_alb && local.create_logs}"
+  create_alb_no_logs = "${local.create_alb && !local.create_logs}"
+  load_balancer_arn  = "${local.create_alb ? local.create_alb_logs ? aws_lb.application.arn : aws_lb.application_no_logs.arn : var.load_balancer_arn}"
+  lb_module          = "${var.create_alb_no_logs ? "aws_lb.application_no_logs.arn" : "aws_lb.application"}" 
+}
+
 resource "aws_lb" "application" {
+  count                      = "${local.create_alb_logs ? 1 : 0}"
   load_balancer_type         = "application"
   name                       = "${var.load_balancer_name}"
   internal                   = "${var.load_balancer_is_internal}"
@@ -15,6 +25,26 @@ resource "aws_lb" "application" {
     bucket  = "${var.log_bucket_name}"
     prefix  = "${var.log_location_prefix}"
   }
+
+  timeouts {
+    create = "${var.load_balancer_create_timeout}"
+    delete = "${var.load_balancer_delete_timeout}"
+    update = "${var.load_balancer_update_timeout}"
+  }
+}
+
+resource "aws_lb" "application_no_logs" {
+  count                      = "${local.create_alb_no_logs ? 1 : 0}"
+  load_balancer_type         = "application"
+  name                       = "${var.load_balancer_name}"
+  internal                   = "${var.load_balancer_is_internal}"
+  security_groups            = ["${var.security_groups}"]
+  subnets                    = ["${var.subnets}"]
+  idle_timeout               = "${var.idle_timeout}"
+  enable_deletion_protection = "${var.enable_deletion_protection}"
+  enable_http2               = "${var.enable_http2}"
+  ip_address_type            = "${var.ip_address_type}"
+  tags                       = "${merge(var.tags, map("Name", var.load_balancer_name))}"
 
   timeouts {
     create = "${var.load_balancer_create_timeout}"
@@ -50,7 +80,7 @@ resource "aws_lb_target_group" "main" {
 
   tags       = "${merge(var.tags, map("Name", lookup(var.target_groups[count.index], "name")))}"
   count      = "${var.target_groups_count}"
-  depends_on = ["aws_lb.application"]
+  depends_on = ["${local.lb_module}"]
 
   lifecycle {
     create_before_destroy = true
@@ -58,7 +88,7 @@ resource "aws_lb_target_group" "main" {
 }
 
 resource "aws_lb_listener" "frontend_http_tcp" {
-  load_balancer_arn = "${aws_lb.application.arn}"
+  load_balancer_arn = "${local.load_balancer_arn}"
   port              = "${lookup(var.http_tcp_listeners[count.index], "port")}"
   protocol          = "${lookup(var.http_tcp_listeners[count.index], "protocol")}"
   count             = "${var.http_tcp_listeners_count}"
@@ -70,7 +100,7 @@ resource "aws_lb_listener" "frontend_http_tcp" {
 }
 
 resource "aws_lb_listener" "frontend_https" {
-  load_balancer_arn = "${aws_lb.application.arn}"
+  load_balancer_arn = "${local.load_balancer_arn}"
   port              = "${lookup(var.https_listeners[count.index], "port")}"
   protocol          = "HTTPS"
   certificate_arn   = "${lookup(var.https_listeners[count.index], "certificate_arn")}"

@@ -1,3 +1,13 @@
+variable "load_balancer_arn" {
+  description = "Whether to create the ALB"
+  default     = ""
+}
+
+variable "elb_id" {
+  description = "The ELB to be attached to"
+  default     = ""
+}
+
 variable "enable_deletion_protection" {
   description = "If true, deletion of the load balancer will be disabled via the AWS API. This will prevent Terraform from deleting the load balancer. Defaults to false."
   default     = false
@@ -82,6 +92,7 @@ variable "load_balancer_update_timeout" {
 
 variable "log_bucket_name" {
   description = "S3 bucket (externally created) for storing load balancer access logs."
+  default     = ""
 }
 
 variable "log_location_prefix" {
