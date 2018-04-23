@@ -79,8 +79,7 @@ resource "aws_lb_target_group" "main" {
   }
 
   tags       = "${merge(var.tags, map("Name", lookup(var.target_groups[count.index], "name")))}"
-  count      = "${var.target_groups_count}"
-  depends_on = ["${local.lb_module}"]
+  count      = "${local.lb_module ? var.target_groups_count : var.target_groups_count}" # Hack to replace dynamic dependency management
 
   lifecycle {
     create_before_destroy = true
