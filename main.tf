@@ -1,10 +1,11 @@
 locals {
-  create_alb         = "${var.load_balancer_arn == "" && var.create_alb}"
-  create_logs        = "${var.log_bucket_name != ""}"
-  create_alb_logs    = "${local.create_alb && local.create_logs}"
-  create_alb_no_logs = "${local.create_alb && !local.create_logs}"
-  load_balancer_arn  = "${local.create_alb ? local.create_alb_logs ? join(",", aws_lb.application.*.arn) : join(",", aws_lb.application_no_logs.*.arn) : var.load_balancer_arn}"
-  lb_module          = "${local.create_alb_no_logs ? "aws_lb.application_no_logs.arn" : "aws_lb.application"}" 
+  create_alb          = "${var.load_balancer_arn == "" && var.create_alb}"
+  create_logs         = "${var.log_bucket_name != ""}"
+  create_alb_logs     = "${local.create_alb && local.create_logs}"
+  create_alb_no_logs  = "${local.create_alb && !local.create_logs}"
+  load_balancer_arn   = "${local.create_alb ? local.create_alb_logs ? join(",", aws_lb.application.*.arn) : join(",", aws_lb.application_no_logs.*.arn) : var.load_balancer_arn}"
+  lb_module           = "${local.create_alb_no_logs ? "aws_lb.application_no_logs.arn" : "aws_lb.application"}" 
+  target_groups_count = "${var.target_groups_count * signum(local.create_alb_logs ? length(aws_lb.application.*.arn) : local.create_alb_logs ? length(aws_lb.application_no_logs.*.arn) : 0)}"
 }
 
 resource "aws_lb" "application" {
@@ -79,7 +80,7 @@ resource "aws_lb_target_group" "main" {
   }
 
   tags       = "${merge(var.tags, map("Name", lookup(var.target_groups[count.index], "name")))}"
-  count      = "${length(local.lb_module) == 0 ? var.target_groups_count : var.target_groups_count}" # Hack to replace dynamic dependency management
+  count      = "${}" # Hack to replace dynamic dependency management
 
   lifecycle {
     create_before_destroy = true
