@@ -1,6 +1,6 @@
 output "dns_name" {
   description = "The DNS name of the load balancer."
-  value       = "${join(",",aws_lb.application.dns_name)}"
+  value       = "${join(",",concat(aws_lb.application.*.dns_name, aws_lb.application_no_logs.*.dns_name)}"
 }
 
 output "http_tcp_listener_arns" {
@@ -25,17 +25,17 @@ output "https_listener_ids" {
 
 output "load_balancer_arn_suffix" {
   description = "ARN suffix of our load balancer - can be used with CloudWatch."
-  value       = "${join(",",aws_lb.application.arn_suffix)}"
+  value       = "${join(",",concat(aws_lb.application.*.arn_suffix, aws_lb.application_no_logs.*.arn_suffix))}"
 }
 
 output "load_balancer_id" {
   description = "The ID and ARN of the load balancer we created."
-  value       = "${join(",",aws_lb.application.id)}"
+  value       = "${join(",", concat(aws_lb.application.*.id, aws_lb.application_no_logs.*.id)}"
 }
 
 output "load_balancer_zone_id" {
   description = "The zone_id of the load balancer to assist with creating DNS records."
-  value       = "${join(",",aws_lb.application.zone_id)}"
+  value       = "${join(",",concat(aws_lb.application.*.zone_id, aws_lb.application_no_logs.*.zone_id))}"
 }
 
 output "target_group_arns" {
