@@ -92,7 +92,7 @@ resource "aws_lb_listener" "frontend_http_tcp" {
   load_balancer_arn = "${local.load_balancer_arn}"
   port              = "${lookup(var.http_tcp_listeners[count.index], "port")}"
   protocol          = "${lookup(var.http_tcp_listeners[count.index], "protocol")}"
-  count             = "${var.http_tcp_listeners_count}"
+  count             = "${local.create_alb ? var.http_tcp_listeners_count : 0}"
 
   default_action {
     target_group_arn = "${aws_lb_target_group.main.*.id[lookup(var.http_tcp_listeners[count.index], "target_group_index", 0)]}"
@@ -106,7 +106,7 @@ resource "aws_lb_listener" "frontend_https" {
   protocol          = "HTTPS"
   certificate_arn   = "${lookup(var.https_listeners[count.index], "certificate_arn")}"
   ssl_policy        = "${lookup(var.https_listeners[count.index], "ssl_policy", var.listener_ssl_policy_default)}"
-  count             = "${var.https_listeners_count}"
+  count             = "${local.create_alb ? var.https_listeners_count : 0}"
 
   default_action {
     target_group_arn = "${aws_lb_target_group.main.*.id[lookup(var.https_listeners[count.index], "target_group_index", 0)]}"
@@ -117,5 +117,5 @@ resource "aws_lb_listener" "frontend_https" {
 resource "aws_lb_listener_certificate" "https_listener" {
   listener_arn    = "${aws_lb_listener.frontend_https.*.arn[lookup(var.extra_ssl_certs[count.index], "https_listener_index")]}"
   certificate_arn = "${lookup(var.extra_ssl_certs[count.index], "certificate_arn")}"
-  count           = "${var.extra_ssl_certs_count}"
+  count           = "${local.create_alb ? var.extra_ssl_certs_count : 0}"
 }
