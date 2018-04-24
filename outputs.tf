@@ -43,6 +43,11 @@ output "target_group_arns" {
   value       = "${slice(concat(aws_lb_target_group.main.*.arn, list("")), 0, var.target_groups_count)}"
 }
 
+output "target_group_arn_suffix" {
+  description = "ARNs suffix of the target groups - can be used with CloudWatch."
+  value       = "${slice(concat(aws_lb_target_group.main.*.arn_suffix, list("")), 0, var.target_groups_count)}"
+}
+
 output "target_group_names" {
   description = "Name of the target group. Useful for passing to your CodeDeploy Deployment Group."
   value       = "${slice(concat(aws_lb_target_group.main.*.name, list("")), 0, var.target_groups_count)}"
